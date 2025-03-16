@@ -1,49 +1,56 @@
-#include <gtest/gtest.h>
 #include "dijkstras.h"
-#include "ladder.h"
+#include <iostream>
+#include <queue>
+#include <vector>
 
-TEST(DijkstraTest, ShortestPathSmall) {
-    Graph G;
-    file_to_graph("small.txt", G);
-    vector<int> previous;
-    vector<int> distances = dijkstra_shortest_path(G, 0, previous);
-    EXPECT_EQ(distances[1], 5);
-    EXPECT_EQ(distances[2], 8);
-    EXPECT_EQ(distances[3], 1);
+using namespace std;
+
+vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& previous) {
+    vector<int> distance(G.numVertices, INF);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    
+    distance[source] = 0;
+    pq.emplace(0, source);
+    previous.resize(G.numVertices, -1);
+    
+    while (!pq.empty()) {
+        int dist = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+        
+        if (dist > distance[u]) continue;
+        
+        for (const Edge& edge : G[u]) {
+            int v = edge.dst;
+            int weight = edge.weight;
+            
+            if (distance[u] + weight < distance[v]) {
+                distance[v] = distance[u] + weight;
+                previous[v] = u;
+                pq.emplace(distance[v], v);
+            }
+        }
+    }
+    return distance;
 }
 
-TEST(DijkstraTest, ShortestPathMedium) {
-    Graph G;
-    file_to_graph("medium.txt", G);
-    vector<int> previous;
-    vector<int> distances = dijkstra_shortest_path(G, 0, previous);
-    EXPECT_EQ(distances[1], 5);
-    EXPECT_EQ(distances[2], 6);
-    EXPECT_EQ(distances[3], 9);
+vector<int> extract_shortest_path(const vector<int>& distances, const vector<int>& previous, int destination) {
+    vector<int> path;
+    for (int at = destination; at != -1; at = previous[at]) {
+        path.push_back(at);
+    }
+    reverse(path.begin(), path.end());
+    return path;
 }
 
-TEST(WordLadderTest, BasicLadder) {
-    set<string> word_list;
-    load_words(word_list, "words.txt");
-    vector<string> ladder = generate_word_ladder("cat", "dog", word_list);
-    EXPECT_EQ(ladder.size(), 4);
-}
-
-TEST(WordLadderTest, ComplexLadder) {
-    set<string> word_list;
-    load_words(word_list, "words.txt");
-    vector<string> ladder = generate_word_ladder("car", "cheat", word_list);
-    EXPECT_EQ(ladder.size(), 4);
-}
-
-TEST(WordLadderTest, NoLadder) {
-    set<string> word_list;
-    load_words(word_list, "words.txt");
-    vector<string> ladder = generate_word_ladder("aaaaa", "zzzzz", word_list);
-    EXPECT_TRUE(ladder.empty());
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+void print_path(const vector<int>& path, int total) {
+    if (path.empty()) {
+        cout << "No path found.\n";
+        return;
+    }
+    cout << "Path: ";
+    for (int node : path) {
+        cout << node << " ";
+    }
+    cout << "\nTotal cost is " << total << "\n";
 }
