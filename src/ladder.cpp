@@ -56,10 +56,11 @@ void print_word_ladder(const vector<string>& ladder) {
         cout << "No word ladder found.\n";
         return;
     }
+    cout << "Word ladder found: ";
     for (const string& word : ladder) {
         cout << word << " ";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void load_words(set<string> & word_list, const string& file_name) {
