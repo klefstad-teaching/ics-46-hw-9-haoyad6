@@ -1,0 +1,27 @@
+#include "ladder.h"
+#include <iostream>
+#include <set>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    set<string> word_list;
+    load_words(word_list, "words.txt");
+    
+    string start, end;
+    cout << "Enter start word: ";
+    cin >> start;
+    cout << "Enter end word: ";
+    cin >> end;
+    
+    if (start == end) {
+        cout << "Error: Start and end words must be different.\n";
+        return 1;
+    }
+    
+    vector<string> ladder = generate_word_ladder(start, end, word_list);
+    print_word_ladder(ladder);
+    
+    return 0;
+}
